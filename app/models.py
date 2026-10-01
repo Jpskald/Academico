@@ -147,3 +147,16 @@ class TipoAvaliacao(models.Model):
     class Meta:
         verbose_name = "Tipo de avaliação"
         verbose_name_plural = "Tipos de avaliação"
+
+class Avaliacao(models.Model):
+    pessoa = models.ForeignKey(Pessoa, on_delete=models.CASCADE, verbose_name="Aluno")
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, verbose_name="Disciplina")
+    tipo = models.ForeignKey(TipoAvaliacao, on_delete=models.CASCADE, verbose_name="Tipo de Avaliação")
+    nota = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Nota")
+    
+    def __str__(self):
+        return f"{self.pessoa.nome} - {self.tipo.nome}: {self.nota}"
+    
+    class Meta:
+        verbose_name = "Avaliação"
+        verbose_name_plural = "Avaliações"

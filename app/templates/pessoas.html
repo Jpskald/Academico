@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pessoas - Acadêmico</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <a class="navbar-brand" href="/">Acadêmico</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link text-dark" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="/pessoas/">Pessoas</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="/cursos/">Cursos</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="/disciplinas/">Disciplinas</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="/admin/">Administração</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        
+        <!-- Formulário de Cadastro -->
+        <div class="card mb-5 border-success">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Cadastrar Nova Pessoa</h4>
+            </div>
+            <div class="card-body">
+                <form id="form-pessoa" method="POST" action="">
+                    {% csrf_token %}
+                    <div class="row">
+                        {% for field in form %}
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <small class="text-danger">{{ field.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div id="status-offline" class="alert alert-warning d-none mt-2" role="alert">
+                        ⚠️ <strong>Você está offline.</strong> O cadastro será salvo localmente e enviado automaticamente quando a internet voltar.
+                    </div>
+                    <button type="submit" id="btn-salvar" class="btn btn-success mt-2">Salvar Cadastro</button>
+                </form>
+            </div>
+        </div>
+
+        <h2 class="mb-4">Tabela de Pessoas</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">CPF</th>
+                    <th scope="col">Ocupação</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pessoa in pessoas %}
+                <tr>
+                    <td>{{ pessoa.nome }}</td>
+                    <td>{{ pessoa.email }}</td>
+                    <td>{{ pessoa.cpf }}</td>
+                    <td>{{ pessoa.ocupacao.nome }}</td>
+                    <td>
+                        <a href="/pessoas/{{ pessoa.pk }}/" class="btn btn-sm btn-outline-success">
+                            ✏️ Editar / Ver Matrículas
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+    <script>
+        const formPessoa = document.getElementById('form-pessoa');
+        const statusOffline = document.getElementById('status-offline');
+
+        // Mostra/esconde alerta conforme status da rede
+        function atualizarStatusRede() {
+            if (!navigator.onLine) {
+                statusOffline.classList.remove('d-none');
+            } else {
+                statusOffline.classList.add('d-none');
+            }
+        }
+        window.addEventListener('online', atualizarStatusRede);
+        window.addEventListener('offline', atualizarStatusRede);
+        atualizarStatusRede();
+
+        formPessoa.addEventListener('submit', async function(e) {
+            if (navigator.onLine) return; // Online: deixa o Django processar normalmente
+
+            e.preventDefault(); // Offline: intercepta o envio
+
+            // Coleta os dados do formulário
+            const formData = new FormData(formPessoa);
+            const dados = {
+                nome:        formData.get('nome'),
+                nome_do_pai: formData.get('nome_do_pai'),
+                nome_da_mae: formData.get('nome_da_mae'),
+                cpf:         formData.get('cpf'),
+                data_nasc:   formData.get('data_nasc'),
+                email:       formData.get('email'),
+                cidade_id:   formData.get('cidade'),
+                ocupacao_id: formData.get('ocupacao'),
+            };
+
+            // Salva na fila do IndexedDB
+            const fila = await localforage.getItem('fila-pessoas') || [];
+            fila.push(dados);
+            await localforage.setItem('fila-pessoas', fila);
+
+            alert('✅ Cadastro salvo offline! Será enviado automaticamente quando a internet voltar.');
+            formPessoa.reset();
+
+            // Agenda a sincronização para quando a internet voltar
+            if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                const sw = await navigator.serviceWorker.ready;
+                await sw.sync.register('sync-pessoas');
+            }
+        });
+    </script>
+</body>
+</html>

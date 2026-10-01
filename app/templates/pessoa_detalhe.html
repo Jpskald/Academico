@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pessoa.nome }} - Acadêmico</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <a class="navbar-brand" href="/">Acadêmico</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link text-dark" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="/pessoas/">Pessoas</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="/cursos/">Cursos</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="/disciplinas/">Disciplinas</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="/admin/">Administração</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <a href="/pessoas/" class="btn btn-outline-secondary mb-4">← Voltar para Pessoas</a>
+        <h2 class="mb-4">Editando: <strong>{{ pessoa.nome }}</strong></h2>
+
+        <form method="POST" action="">
+            {% csrf_token %}
+
+            <!-- ===== DADOS DA PESSOA ===== -->
+            <div class="card mb-4 border-success">
+                <div class="card-header bg-success text-white"><h5 class="mb-0">Dados Pessoais</h5></div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for field in form %}
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}<small class="text-danger">{{ field.errors.0 }}</small>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MATRÍCULAS (inline) ===== -->
+            <div class="card mb-4 border-primary">
+                <div class="card-header bg-primary text-white"><h5 class="mb-0">Matrículas</h5></div>
+                <div class="card-body">
+                    {{ matriculas_fs.management_form }}
+                    {% for fs_form in matriculas_fs %}
+                    <div class="row align-items-center border-bottom py-2">
+                        {% for field in fs_form %}
+                        <div class="col-md-3 mb-2">
+                            <label class="font-weight-bold small">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== FREQUÊNCIAS (inline) ===== -->
+            <div class="card mb-4 border-warning">
+                <div class="card-header bg-warning"><h5 class="mb-0">Frequências</h5></div>
+                <div class="card-body">
+                    {{ frequencia_fs.management_form }}
+                    {% for fs_form in frequencia_fs %}
+                    <div class="row align-items-center border-bottom py-2">
+                        {% for field in fs_form %}
+                        <div class="col-md-3 mb-2">
+                            <label class="font-weight-bold small">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== AVALIAÇÕES (inline) ===== -->
+            <div class="card mb-4 border-danger">
+                <div class="card-header bg-danger text-white"><h5 class="mb-0">Avaliações / Notas</h5></div>
+                <div class="card-body">
+                    {{ avaliacao_fs.management_form }}
+                    {% for fs_form in avaliacao_fs %}
+                    <div class="row align-items-center border-bottom py-2">
+                        {% for field in fs_form %}
+                        <div class="col-md-3 mb-2">
+                            <label class="font-weight-bold small">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg mb-5">💾 Salvar Tudo</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

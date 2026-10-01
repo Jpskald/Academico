@@ -1,0 +1,21 @@
+{
+  "name": "Sistema Acadêmico",
+  "short_name": "Acadêmico",
+  "description": "Sistema de gerenciamento Acadêmico",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#28a745",
+  "icons": [
+    {
+      "src": "/static/icons/academico-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/academico-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
